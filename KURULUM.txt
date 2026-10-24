@@ -1,0 +1,11 @@
+HAT TAKIP - kurulum
+
+1) github.com > New repository > ad ver (ör. hat-takip) > Public > Create repository.
+2) "uploading an existing file" > bu klasördeki dosyaların hepsini sürükle
+   (index.html, sw.js, manifest.webmanifest, xlsx.full.min.js, icon-180.png, icon-192.png, icon-512.png)
+   > Commit changes.
+3) Settings > Pages > Branch: main, / (root) > Save. 1-2 dk bekle.
+4) iPhone'da https://KULLANICI-ADIN.github.io/REPO-ADI/ adresini Safari ile aç > Paylaş > Ana Ekrana Ekle.
+5) Uygulamada sağ üstteki dişli > "Ayar dosyası yükle" ile kendi ayar dosyanı seç.
+
+Kodda hiçbir tesis bilgisi yoktur. Ayar dosyasını GitHub'a YÜKLEME; sadece telefonda kullan.
