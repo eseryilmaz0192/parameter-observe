@@ -14,18 +14,18 @@
 /* Layout: Swiss / International Typographic Style — flush-left grid, Helvetica, black rules, one red signal colour; sticky header, stacked rows, fixed bottom tab bar. */
 :root{
   --bg:#ffffff; --paper:#f2f2f0; --line:#d9d9d6; --rule:#111111; --ink:#111111; --ink-2:#555552; --ink-3:#8a8a86;
-  --red:#e2001a; --red-soft:#fde5e8; --band:rgba(17,17,17,.07); --ok:#111111; --stale:#b07600;
+  --red:#e2001a; --red-soft:#fde5e8; --up:#00875a; --down:#e2001a; --band:rgba(17,17,17,.07); --ok:#111111; --stale:#b07600;
   --h1:#e2001a; --h2:#0057b8; --h3:#8a8a86; --h4:#d08c00; --h5:#00875a; --h6:#6b4fbb; --avg:#111111;
   --font:"Helvetica Neue",Helvetica,Arial,"Nimbus Sans",sans-serif;
   --mono:"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0b0b0b; --paper:#171717; --line:#2c2c2c; --rule:#f2f2f0; --ink:#f2f2f0; --ink-2:#a8a8a4; --ink-3:#74746f;
-  --red:#ff3347; --red-soft:#3a0f15; --band:rgba(242,242,240,.09); --ok:#f2f2f0; --stale:#e6b13c;
+  --red:#ff3347; --red-soft:#3a0f15; --up:#3fcf95; --down:#ff3347; --band:rgba(242,242,240,.09); --ok:#f2f2f0; --stale:#e6b13c;
   --h1:#ff3347; --h2:#5aa2ff; --h3:#9c9c97; --h4:#f0b23a; --h5:#3fcf95; --h6:#a993ff; --avg:#f2f2f0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0b0b0b; --paper:#171717; --line:#2c2c2c; --rule:#f2f2f0; --ink:#f2f2f0; --ink-2:#a8a8a4; --ink-3:#74746f;
-  --red:#ff3347; --red-soft:#3a0f15; --band:rgba(242,242,240,.09); --ok:#f2f2f0; --stale:#e6b13c;
+  --red:#ff3347; --red-soft:#3a0f15; --up:#3fcf95; --down:#ff3347; --band:rgba(242,242,240,.09); --ok:#f2f2f0; --stale:#e6b13c;
   --h1:#ff3347; --h2:#5aa2ff; --h3:#9c9c97; --h4:#f0b23a; --h5:#3fcf95; --h6:#a993ff; --avg:#f2f2f0; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
@@ -73,7 +73,7 @@ main{max-width:720px;margin:0 auto;min-height:72vh;touch-action:pan-y;padding-le
 .prow .v b{font-weight:700;font-size:24px;letter-spacing:-.03em}
 .prow .v u{text-decoration:none;font-size:11px;color:var(--ink-3);margin-left:3px}
 .prow .v span{display:block;font-size:12px;color:var(--ink-2);margin-top:1px}
-.prow .v span.up,.prow .v span.dn{color:var(--ink);font-weight:700}
+.prow .v span.up{color:var(--up);font-weight:700}.prow .v span.dn{color:var(--down);font-weight:700}
 .prow svg{width:60px;height:26px;display:block}
 .prow svg path{stroke:var(--ink)} .prow svg circle{fill:var(--red)}
 .pill{display:inline-block;font-weight:700;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:1px 5px;margin-left:7px;vertical-align:2px;border-radius:0}
@@ -143,7 +143,7 @@ nav.tabs .dot{display:inline-block;width:6px;height:6px;background:var(--stale);
 .dcard .dh b{font-size:15px;color:var(--ink);letter-spacing:-.01em}
 .dcard .dv{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .dcard .dv b{font-size:22px;color:var(--ink);letter-spacing:-.03em}
-.dcard .dv i{font-style:normal;color:var(--ink);font-weight:700;margin-left:4px}
+.dcard .dv i{font-style:normal;color:var(--ink);font-weight:700;margin-left:4px}.dcard .dv i.up{color:var(--up)}.dcard .dv i.dn{color:var(--down)}
 .dcard .chart{height:150px}
 
 /* settings */
@@ -161,7 +161,32 @@ nav.tabs .dot{display:inline-block;width:6px;height:6px;background:var(--stale);
 .addbtn{all:unset;cursor:pointer;font-weight:700;font-size:14px;color:var(--red);padding:4px 0;justify-self:start}
 .rules{display:grid;gap:4px;font-size:14px}
 .rules span{color:var(--ink-3);font-size:12.5px}
-.themeseg{display:flex}
+body.lock{overflow:hidden}
+.ov{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ov-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:2px solid var(--rule);padding-bottom:8px}
+.ov-t{min-width:0}.ov-t h2{font-size:24px;letter-spacing:-.03em;margin:0;line-height:1.05;overflow-wrap:anywhere}.ov-t span{display:block;font-size:12px;color:var(--ink-2);margin-top:3px}
+.ov .seg{margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.legend button{font-size:13px;font-weight:700;border:1.5px solid var(--rule);background:transparent;color:var(--ink);border-radius:0;padding:4px 9px;cursor:pointer}
+.legend button[aria-pressed="false"]{color:var(--ink-3);border-color:var(--line);text-decoration:line-through}
+.legend i,.readout i,.keys i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:0}
+.legend button[aria-pressed="false"] i{opacity:.3}
+.ov-c{position:relative;flex:none;min-height:260px;height:55vh;touch-action:none;cursor:crosshair}
+@media (orientation:landscape) and (max-height:500px){.ov-c{height:72vh}}
+.chart.big{width:100%;height:100%}
+.chart .mtxt{font-size:11px;font-weight:700}
+.cur{position:absolute;width:0;border-left:1.5px solid var(--red);pointer-events:none}
+.readout{border-top:1px solid var(--rule);display:grid;gap:2px;font-variant-numeric:tabular-nums}
+.readout p{margin:6px 0 2px;font-size:12px;color:var(--ink-2);font-weight:700;letter-spacing:.04em}
+.readout div{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:baseline;font-size:14px;padding:3px 0;border-bottom:1px solid var(--line)}
+.readout span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.readout b{font-size:17px;letter-spacing:-.02em}.readout u{text-decoration:none;font-size:11px;color:var(--ink-3);min-width:34px}
+.cwrap{cursor:zoom-in;display:block}
+.cwrap:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.keys{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink-2)}
+.keys b{color:var(--ink);font-variant-numeric:tabular-nums}
+.set.bd{border:0;padding:0}
+.hint{font-size:11.5px;color:var(--ink-3);margin:4px 0 0}
 @media (prefers-reduced-motion:no-preference){.detail{animation:op .16s ease-out}@keyframes op{from{opacity:.3}}}
 </style>
 </head><body>
@@ -216,7 +241,7 @@ const PORDER=Object.keys(PARAMS);
 const HATCOL=['--h1','--h2','--h3','--h4','--h5','--h6'];
 const RANGES=[['1g',1],['3g',3],['7g',7],['30g',30],['Tümü',0]];
 const NTAB=4;
-const DEFCFG={ad:'Hat Takip',sekmeler:[],spek:[],pano:[],kurallar:[],eskiSaat:12};
+const DEFCFG={ad:'Hat Takip',sekmeler:[],spek:[],pano:[],grafikler:[],kurallar:[],eskiSaat:12};
 
 const S={db:null,docs:{},map:{},cfg:JSON.parse(JSON.stringify(DEFCFG)),tab:'pano',hat:{},open:null,range:{},draft:null};
 try{const t=localStorage.getItem('ht_tab');if(t)S.tab=t;}catch(e){}
@@ -345,26 +370,114 @@ function spark(pts){if(pts.length<2)return '<svg aria-hidden="true"></svg>';cons
   const X=x=>2+(x-x0)/((x1-x0)||1)*60,Y=y=>23-(y-y0)/((y1-y0)||1)*20;const d=pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');const l=pts[pts.length-1];
   return `<svg viewBox="0 0 64 26" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="${X(l[0]).toFixed(1)}" cy="${Y(l[1]).toFixed(1)}" r="2.4" fill="var(--red)"/></svg>`;}
 
-function chart(sh,p,hat,days){const S2=series(sh,p,hat);const sp=spec(sh,p);const dec=PARAMS[p].d;
-  const tEnd=SER[sh].last;const tMin=days?tEnd-days*864e5:-Infinity;
-  const cut=a=>a.filter(x=>x[0]>=tMin);
-  const lines=Object.entries(S2.lines).map(([h,a])=>({h,a:cut(a)})).filter(l=>l.a.length);
-  const avg=hat==='ort'&&lines.length>1?cut(S2.avg):[];
-  const all=lines.flatMap(l=>l.a).concat(avg);if(!all.length)return '<p class="note">Bu aralıkta veri yok.</p>';
+/* ---------- grafik motoru ---------- */
+const PAL=['--h1','--h2','--h4','--h5','--h6','--h3'];
+const lblT=(t,span)=>{const d=new Date(t);return span<2*864e5?p2(d.getUTCHours())+':'+p2(d.getUTCMinutes()):p2(d.getUTCDate())+'.'+p2(d.getUTCMonth()+1);};
+function meanOf(a){return a.length?a.reduce((s,x)=>s+x[1],0)/a.length:null;}
+/* o: {series:[{name,col,pts,w,mean,u,d}], spec, W, H, dec, norm, big} */
+function plot(o){const vis=o.series.filter(s=>s.pts.length);if(!vis.length)return {svg:'<p class="note">Bu aralıkta veri yok.</p>',empty:true};
+  const W=o.W,H=o.H,L=o.norm?8:(o.big?52:46),R=o.big?14:8,T=o.big?14:10,B=o.big?26:24;
+  vis.forEach(s=>{if(o.norm){const ys=s.pts.map(x=>x[1]);const lo=Math.min(...ys),hi=Math.max(...ys);s.np=s.pts.map(x=>[x[0],(x[1]-lo)/((hi-lo)||1)]);s.nm=m=>(m-lo)/((hi-lo)||1);}else{s.np=s.pts;s.nm=m=>m;}});
+  const all=vis.flatMap(s=>s.np);
   let y0=Math.min(...all.map(x=>x[1])),y1=Math.max(...all.map(x=>x[1]));
+  const sp=o.norm?null:o.spec;
   if(sp){if(isFinite(sp.lo)){y0=Math.min(y0,sp.lo);y1=Math.max(y1,sp.lo);}if(isFinite(sp.hi)){y0=Math.min(y0,sp.hi);y1=Math.max(y1,sp.hi);}}
   const pad=(y1-y0||Math.abs(y1)*0.02||1)*0.08;y0-=pad;y1+=pad;
   const x0=Math.min(...all.map(x=>x[0])),x1=Math.max(...all.map(x=>x[0]));
-  const W=340,Hh=220,L=46,R=8,T=10,B=24;const X=x=>L+(x-x0)/((x1-x0)||1)*(W-L-R),Y=y=>T+(1-(y-y0)/((y1-y0)||1))*(Hh-T-B);
-  let g='';
+  const X=x=>L+(x-x0)/((x1-x0)||1)*(W-L-R),Y=y=>T+(1-(y-y0)/((y1-y0)||1))*(H-T-B);
+  let g='';const dec=o.dec==null?2:o.dec;
   if(sp){const a=Y(Math.min(sp.hi,y1)),b=Y(Math.max(sp.lo,y0));if(b>a)g+=`<rect x="${L}" width="${W-L-R}" y="${a.toFixed(1)}" height="${(b-a).toFixed(1)}" fill="var(--band)"/>`;}
-  for(let i=0;i<=3;i++){const v=y0+(y1-y0)*i/3;const yy=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${L-5}" y="${(yy+3.5).toFixed(1)}" text-anchor="end">${fmtN(v,dec>2?3:dec)}</text>`;}
-  const nT=3;for(let i=0;i<=nT;i++){const t=x0+(x1-x0)*i/nT;const d=new Date(t);const lab=(x1-x0)<2*864e5?p2(d.getUTCHours())+':'+p2(d.getUTCMinutes()):p2(d.getUTCDate())+'.'+p2(d.getUTCMonth()+1);g+=`<text x="${X(t).toFixed(1)}" y="${Hh-6}" text-anchor="${i===0?'start':i===nT?'end':'middle'}">${lab}</text>`;}
-  const path=(a,col,w)=>{const d=a.map((x,i)=>(i?'L':'M')+X(x[0]).toFixed(1)+' '+Y(x[1]).toFixed(1)).join('');const l=a[a.length-1];
-    return `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>`+(a.length<40?a.map(x=>`<circle cx="${X(x[0]).toFixed(1)}" cy="${Y(x[1]).toFixed(1)}" r="1.8" fill="${col}"/>`).join(''):'')+`<circle cx="${X(l[0]).toFixed(1)}" cy="${Y(l[1]).toFixed(1)}" r="3.4" fill="${col}"/>`;};
-  lines.forEach(l=>{g+=path(l.a,hatColor(l.h),hat==='ort'&&lines.length>1?1.4:2.2);});
-  if(avg.length)g+=path(avg,'var(--avg)',2.6);
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" role="img" aria-label="${esc(sh)} ${esc(PARAMS[p].n)} zaman grafiği">${g}</svg>`;}
+  const nY=o.big?5:3;for(let i=0;i<=nY;i++){const v=y0+(y1-y0)*i/nY;const yy=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`+(o.norm?'':`<text x="${L-5}" y="${(yy+3.5).toFixed(1)}" text-anchor="end">${fmtN(v,dec>2?3:dec)}</text>`);}
+  const nT=o.big?Math.max(3,Math.min(6,Math.floor(W/90))):3;for(let i=0;i<=nT;i++){const t=x0+(x1-x0)*i/nT;g+=`<text x="${X(t).toFixed(1)}" y="${H-7}" text-anchor="${i===0?'start':i===nT?'end':'middle'}">${lblT(t,x1-x0)}</text>`;}
+  vis.forEach(s=>{if(!s.mean)return;const m=meanOf(s.pts);if(m==null)return;const yy=Y(s.nm(m));
+    g+=`<line x1="${L}" x2="${W-R}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="${s.col}" stroke-width="1.2" stroke-dasharray="6 4" opacity=".85"/><text class="mtxt" x="${L+4}" y="${(yy-4).toFixed(1)}" text-anchor="start" style="fill:${s.col}">ort. ${fmtN(m,s.d==null?dec:s.d)}</text>`;});
+  vis.forEach(s=>{const a=s.np;const d=a.map((x,i)=>(i?'L':'M')+X(x[0]).toFixed(1)+' '+Y(x[1]).toFixed(1)).join('');const l=a[a.length-1];
+    g+=`<path d="${d}" fill="none" stroke="${s.col}" stroke-width="${s.w||2}" stroke-linejoin="round"/>`+(a.length<(o.big?80:40)?a.map(x=>`<circle cx="${X(x[0]).toFixed(1)}" cy="${Y(x[1]).toFixed(1)}" r="${o.big?2.2:1.8}" fill="${s.col}"/>`).join(''):'')+`<circle cx="${X(l[0]).toFixed(1)}" cy="${Y(l[1]).toFixed(1)}" r="${o.big?4:3.4}" fill="${s.col}"/>`;});
+  const attrs=o.big?`viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"`:`viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"`;
+  return {svg:`<svg class="chart${o.big?' big':''}" ${attrs} role="img" aria-label="${esc(o.label||'Zaman grafiği')}">${g}</svg>`,X,Y,L,R,T,B,W,H,x0,x1,vis,inv:px=>x0+(px-L)/((W-L-R)||1)*(x1-x0)};}
+
+/* bir sayfa+parametre için seri listesi (hat çizgileri + ortalama) */
+function sheetSeries(sh,p,hat,days,withMean){const S2=series(sh,p,hat);const tEnd=SER[sh].last;const tMin=days?tEnd-days*864e5:-Infinity;const cut=a=>a.filter(x=>x[0]>=tMin);
+  const P=PARAMS[p];const lines=Object.entries(S2.lines).map(([h,a])=>({h,a:cut(a)})).filter(l=>l.a.length);const multi=hat==='ort'&&lines.length>1;
+  const out=lines.map(l=>({name:hatName(l.h),col:hatColor(l.h),pts:l.a,w:multi?1.4:2.2,u:P.u,d:P.d,mean:withMean&&!multi}));
+  if(multi)out.push({name:'Ortalama',col:'var(--avg)',pts:cut(S2.avg),w:2.6,u:P.u,d:P.d,mean:withMean});
+  return out;}
+function chart(sh,p,hat,days){return plot({series:sheetSeries(sh,p,hat,days,false),spec:spec(sh,p),W:340,H:220,dec:PARAMS[p].d,label:sh+' '+PARAMS[p].n+' zaman grafiği'}).svg;}
+
+/* ---------- büyük grafik ---------- */
+let BIG=null,BIGR=null;
+function bigData(){const it=BIG.items.filter(x=>SER[x.sh]&&SER[x.sh].params.includes(x.p));if(!it.length)return {series:[]};
+  if(it.length===1){const {sh,p,hat}=it[0];return {series:sheetSeries(sh,p,hat||'ort',BIG.range,true),spec:spec(sh,p),dec:PARAMS[p].d,norm:false};}
+  const tEnd=Math.max(...it.map(x=>SER[x.sh].last));const tMin=BIG.range?tEnd-BIG.range*864e5:-Infinity;
+  const ser=it.map((x,i)=>{const P=PARAMS[x.p];return {name:x.sh+' · '+P.n,col:`var(${PAL[i%PAL.length]})`,pts:series(x.sh,x.p,'ort').avg.filter(q=>q[0]>=tMin),w:2.2,u:P.u,d:P.d,mean:true};});
+  const units=new Set(ser.map(s=>s.u));return {series:ser,norm:units.size>1,dec:Math.max(...ser.map(s=>s.d))};}
+function openBig(cfg){closeBig();BIG=Object.assign({range:7,hidden:[]},cfg);const ov=document.createElement('div');ov.className='ov';ov.id='ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',cfg.title||'Grafik');
+  document.body.appendChild(ov);document.body.classList.add('lock');renderBig();}
+function closeBig(){const o=$('ov');if(o)o.remove();document.body.classList.remove('lock');BIG=null;BIGR=null;}
+function renderBig(){const ov=$('ov');if(!ov||!BIG)return;const D=bigData();BIG.D=D;const single=BIG.items.length===1;
+  ov.innerHTML=`<div class="ov-h"><div class="ov-t"><h2>${esc(BIG.title)}</h2><span>${esc(BIG.sub||'')}</span></div><button class="iconbtn" id="ovX" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="seg" role="group" aria-label="Zaman aralığı">${RANGES.map(([n,d])=>`<button data-brng="${d}" aria-pressed="${BIG.range===d}">${n}</button>`).join('')}</div>
+  <div class="legend" role="group" aria-label="Seriler">${D.series.map((s,i)=>`<button data-sx="${i}" aria-pressed="${!BIG.hidden.includes(s.name)}"><i style="background:${s.col}"></i>${esc(s.name)}</button>`).join('')}</div>
+  <div class="ov-c" id="ovC"></div>
+  <div class="readout" id="ovR"></div>
+  <p class="note">${D.norm?'Birimler farklı olduğu için her seri kendi ölçeğinde çizildi; değerleri aşağıdan okuyun. ':''}Kesikli çizgiler seçili aralığın ortalaması. Grafiğe dokunup parmağınızı kaydırarak değer okuyun.</p>
+  <div class="tools">${single&&BIG.items[0].sh?`<button class="btn ghost" id="ovGo">Sekmede aç</button>`:''}${BIG.custom!=null?`<button class="btn ghost" id="ovEdit">Düzenle</button>`:''}</div>`;
+  $('ovX').onclick=closeBig;
+  ov.querySelectorAll('[data-brng]').forEach(b=>b.onclick=()=>{BIG.range=+b.dataset.brng;renderBig();});
+  ov.querySelectorAll('[data-sx]').forEach(b=>b.onclick=()=>{const n=D.series[+b.dataset.sx].name;const i=BIG.hidden.indexOf(n);if(i<0)BIG.hidden.push(n);else BIG.hidden.splice(i,1);renderBig();});
+  const go=$('ovGo');if(go)go.onclick=()=>{const {sh,p}=BIG.items[0];closeBig();goTo(sectionOf(sh),sh+'|'+p);};
+  const ed=$('ovEdit');if(ed)ed.onclick=()=>{const i=BIG.custom;closeBig();openBuilder(i);};
+  drawBig();}
+function drawBig(){const c=$('ovC');if(!c||!BIG)return;const D=BIG.D;const ser=D.series.filter(s=>!BIG.hidden.includes(s.name));
+  const W=Math.max(260,Math.floor(c.clientWidth)),H=Math.max(200,Math.floor(c.clientHeight));
+  BIGR=plot({series:ser.map(s=>Object.assign({},s)),spec:D.spec,W,H,dec:D.dec,norm:D.norm,big:true,label:BIG.title});
+  c.innerHTML=BIGR.svg+'<div class="cur" id="ovCur" hidden></div>';readout(null);
+  if(BIGR.empty)return;
+  const mv=e=>{const r=c.getBoundingClientRect();const px=e.clientX-r.left;if(px<BIGR.L||px>BIGR.W-BIGR.R)return;readout(BIGR.inv(px));};
+  c.onpointerdown=e=>{c.setPointerCapture&&c.setPointerCapture(e.pointerId);mv(e);};c.onpointermove=e=>{if(e.pointerType==='mouse'||e.buttons||e.pressure)mv(e);};}
+function nearest(a,t){let lo=0,hi=a.length-1;if(hi<0)return null;while(hi-lo>1){const m=(lo+hi)>>1;if(a[m][0]<t)lo=m;else hi=m;}return Math.abs(a[lo][0]-t)<=Math.abs(a[hi][0]-t)?a[lo]:a[hi];}
+function readout(t){const R=$('ovR');if(!R||!BIGR)return;const cur=$('ovCur');const vis=BIGR.vis||[];
+  let tt=null;if(t!=null){let best=null;vis.forEach(s=>{const n=nearest(s.pts,t);if(n&&(best==null||Math.abs(n[0]-t)<Math.abs(best-t)))best=n[0];});tt=best;}
+  if(cur){if(tt==null)cur.hidden=true;else{cur.hidden=false;cur.style.left=BIGR.X(tt).toFixed(1)+'px';cur.style.top=BIGR.T+'px';cur.style.height=(BIGR.H-BIGR.T-BIGR.B)+'px';}}
+  const rows=vis.map(s=>{const pt=tt==null?s.pts[s.pts.length-1]:nearest(s.pts,tt);const ok=pt&&(tt==null||Math.abs(pt[0]-tt)<1.5*36e5);
+    return `<div><i style="background:${s.col}"></i><span>${esc(s.name)}</span><b>${ok?fmtN(pt[1],s.d):'–'}</b><u>${esc(s.u||'')}</u></div>`;}).join('');
+  R.innerHTML=`<p>${tt==null?'Son değerler':fmtT(tt)}</p>`+rows;}
+window.addEventListener('resize',()=>{if(BIG)drawBig();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('ov'))closeBig();});
+
+/* ---------- kendi grafiğim ---------- */
+let BD=null;
+function openBuilder(idx){closeBig();const g=idx!=null&&S.cfg.grafikler[idx]?JSON.parse(JSON.stringify(S.cfg.grafikler[idx])):{ad:'',items:[{sayfa:'',p:''},{sayfa:'',p:''}]};
+  BD={idx,g,del:false};const ov=document.createElement('div');ov.className='ov';ov.id='ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Grafik oluştur');document.body.appendChild(ov);document.body.classList.add('lock');renderBuilder();}
+function readBuilder(){const ov=$('ov');if(!ov||!BD)return;BD.g.ad=$('bdAd').value;BD.g.items=[...ov.querySelectorAll('.bd-row')].map(r=>({sayfa:r.querySelector('[data-f=sh]').value,p:r.querySelector('[data-f=p]').value}));}
+function renderBuilder(){const ov=$('ov');const g=BD.g;const sheets=Object.keys(SER).sort();
+  let h=`<div class="ov-h"><div class="ov-t"><h2>${BD.idx!=null?'Grafiği düzenle':'Grafik oluştur'}</h2><span>Farklı sayfalardan en fazla 6 seri, hat ortalaması olarak</span></div><button class="iconbtn" id="ovX" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="set bd"><div class="grp"><label for="bdAd"><h3>Grafik adı</h3></label><input type="text" id="bdAd" maxlength="40" placeholder="Ör. Tuz karşılaştırma" value="${esc(g.ad)}"></div>
+  <div class="grp"><h3>Seriler</h3><div class="rowg pano head"><span>Sayfa</span><span>Parametre</span><span></span></div>`;
+  g.items.forEach((x,i)=>{const ps=x.sayfa&&SER[x.sayfa]?SER[x.sayfa].params:[];
+    h+=`<div class="rowg pano bd-row"><select id="bd${i}s" data-f="sh" aria-label="Seri ${i+1} sayfa"><option value="">Sayfa</option>${sheets.map(s=>`<option value="${esc(s)}"${s===x.sayfa?' selected':''}>${esc(s)}</option>`).join('')}</select>
+    <select id="bd${i}p" data-f="p" aria-label="Seri ${i+1} parametre"><option value="">Parametre</option>${ps.map(p=>`<option value="${p}"${p===x.p?' selected':''}>${PARAMS[p].n} (${PARAMS[p].u})</option>`).join('')}</select>
+    <button class="xbtn" data-bdel="${i}" aria-label="Seriyi sil">×</button></div>`;});
+  h+=`${g.items.length<6?'<button class="addbtn" id="bdAdd">+ Seri ekle</button>':''}<p class="help">Aynı birimdeki seriler ortak eksende, farklı birimdekiler kendi ölçeğinde çizilir.</p></div>
+  <div class="tools"><button class="btn" id="bdSave">Kaydet</button>${BD.idx!=null?`<button class="btn danger" id="bdDel">${BD.del?'Emin misiniz? Tekrar basın':'Grafiği sil'}</button>`:''}<button class="btn ghost" id="bdCancel">Vazgeç</button></div><div class="msg" id="bdMsg"></div></div>`;
+  ov.innerHTML=h;
+  $('ovX').onclick=closeBig;$('bdCancel').onclick=closeBig;
+  ov.querySelectorAll('[data-f=sh]').forEach(s=>s.onchange=()=>{readBuilder();const i=+s.id.match(/\d+/)[0];BD.g.items[i].p='';const ps=SER[BD.g.items[i].sayfa]?SER[BD.g.items[i].sayfa].params:[];
+    const same=BD.g.items.find((y,j)=>j!==i&&y.p&&ps.includes(y.p));if(same)BD.g.items[i].p=same.p;else if(ps.length===1)BD.g.items[i].p=ps[0];renderBuilder();});
+  ov.querySelectorAll('[data-bdel]').forEach(b=>b.onclick=()=>{readBuilder();BD.g.items.splice(+b.dataset.bdel,1);if(!BD.g.items.length)BD.g.items.push({sayfa:'',p:''});renderBuilder();});
+  const ad=$('bdAdd');if(ad)ad.onclick=()=>{readBuilder();const last=BD.g.items[BD.g.items.length-1];BD.g.items.push({sayfa:'',p:last&&last.p||''});renderBuilder();};
+  $('bdSave').onclick=async()=>{readBuilder();const items=BD.g.items.filter(x=>x.sayfa&&x.p);const m=$('bdMsg');
+    if(!items.length){m.className='msg err';m.textContent='En az bir sayfa ve parametre seçin.';return;}
+    const gr={ad:(BD.g.ad||'').trim()||items.map(x=>x.sayfa).join(' · ')+' '+PARAMS[items[0].p].n,items};
+    const c=JSON.parse(JSON.stringify(S.cfg));c.grafikler=c.grafikler||[];if(BD.idx!=null)c.grafikler[BD.idx]=gr;else c.grafikler.push(gr);
+    try{await S.db.collection('ayar').doc('config').set(normCfg(c));S.cfg=normCfg(c);closeBig();render();}catch(e){m.className='msg err';m.textContent='Kaydedilemedi.';}};
+  const dl=$('bdDel');if(dl)dl.onclick=async()=>{readBuilder();if(!BD.del){BD.del=true;renderBuilder();return;}
+    const c=JSON.parse(JSON.stringify(S.cfg));c.grafikler.splice(BD.idx,1);try{await S.db.collection('ayar').doc('config').set(normCfg(c));S.cfg=normCfg(c);closeBig();render();}catch(e){$('bdMsg').className='msg err';$('bdMsg').textContent='Silinemedi.';}};}
+function customCard(g,i){const it=g.items.filter(x=>SER[x.sayfa]&&SER[x.sayfa].params.includes(x.p));
+  let body='<p class="note">Bu grafiğin sayfaları henüz yüklenmedi.</p>';
+  if(it.length){const tEnd=Math.max(...it.map(x=>SER[x.sayfa].last));const ser=it.map((x,j)=>{const P=PARAMS[x.p];return {name:x.sayfa+' · '+P.n,col:`var(${PAL[j%PAL.length]})`,pts:series(x.sayfa,x.p,'ort').avg.filter(q=>q[0]>=tEnd-7*864e5),w:2,u:P.u,d:P.d};});
+    const norm=new Set(ser.map(s=>s.u)).size>1;body=plot({series:ser,W:340,H:220,dec:Math.max(...ser.map(s=>s.d)),norm,label:g.ad}).svg+`<span class="keys">${ser.map(s=>`<span><i style="background:${s.col}"></i>${esc(s.name)} <b>${fmtN(s.pts.length?s.pts[s.pts.length-1][1]:null,s.d)}</b></span>`).join('')}</span>`;}
+  return `<button class="dcard" data-gi="${i}"><span class="dh"><span><b>${esc(g.ad)}</b></span><span class="dv">${it.length} seri · 7 gün</span></span>${body}</button>`;}
 function hatColor(h){const n=parseInt(h.slice(1),10);return n?`var(${HATCOL[(n-1)%6]})`:'var(--red)';}
 const hatName=h=>h==='t'?'Tek':'Hat '+h.slice(1);
 
@@ -380,13 +493,17 @@ function render(){renderHeader();renderTabs();const v=$('view');const all=Object
   const lastT=all.length?Math.max(...all.map(sh=>SER[sh].last)):null;
   $('lastAll').textContent=lastT?'Son ölçüm '+fmtT(lastT)+' · '+ago(lastT):'Henüz veri yok';
   const sec=sections().find(s=>s.k===S.tab);
-  if(sec.dash){v.innerHTML=dashHtml();v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goTo(b.dataset.go,b.dataset.p));const b=$('emptyUp');if(b)b.onclick=openUp;const c=$('emptySet');if(c)c.onclick=openSet;return;}
+  if(sec.dash){v.innerHTML=dashHtml();v.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goTo(b.dataset.go,b.dataset.p));
+    v.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{const k=b.dataset.bd;const i=k.lastIndexOf('|');const sh=k.slice(0,i),p=k.slice(i+1);openBig({title:sh+' · '+PARAMS[p].n,sub:'Tüm hatlar · '+PARAMS[p].u,items:[{sh,p,hat:'ort'}],range:7});});
+    v.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{const i=+b.dataset.gi;const g=S.cfg.grafikler[i];openBig({title:g.ad,sub:'Kendi grafiğin · hat ortalamaları',items:g.items.map(x=>({sh:x.sayfa,p:x.p,hat:'ort'})),range:7,custom:i});});
+    const gn=$('gNew');if(gn)gn.onclick=()=>openBuilder(null);const b=$('emptyUp');if(b)b.onclick=openUp;const c=$('emptySet');if(c)c.onclick=openSet;return;}
   const sheets=all.filter(sh=>sectionOf(sh)===S.tab).sort();
   if(!sheets.length){v.innerHTML=emptyHtml(sec,all.length);const b=$('emptyUp');if(b)b.onclick=openUp;return;}
   v.innerHTML=sheets.map(sh=>sheetHtml(sh)).join('');
   v.querySelectorAll('[data-hat]').forEach(b=>b.onclick=()=>{S.hat[b.dataset.sh]=b.dataset.hat;render();});
   v.querySelectorAll('.prow').forEach(b=>b.onclick=()=>{const k=b.dataset.key;S.open=S.open===k?null:k;render();});
-  v.querySelectorAll('[data-rng]').forEach(b=>b.onclick=()=>{S.range[b.dataset.key]=+b.dataset.rng;render();});}
+  v.querySelectorAll('[data-rng]').forEach(b=>b.onclick=()=>{S.range[b.dataset.key]=+b.dataset.rng;render();});
+  v.querySelectorAll('.cwrap').forEach(el=>{const f=()=>{const k=el.dataset.big;const i=k.lastIndexOf('|');const sh=k.slice(0,i),p=k.slice(i+1);openBig({title:sh+' · '+PARAMS[p].n,sub:(el.dataset.hh==='ort'?'Tüm hatlar':hatName(el.dataset.hh))+' · '+PARAMS[p].u,items:[{sh,p,hat:el.dataset.hh}],range:+el.dataset.r});};el.onclick=f;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});}
 
 function emptyHtml(sec,any){const kel=sec.kel?wordsTxt(sec.kel):'';
   const what=sec.k==='diger'?'hiçbir sekmeye uymayan Excel sayfaları':kel?`adında “${esc(kel)}” geçen Excel sayfaları`:'bu sekmeye atadığınız Excel sayfaları';
@@ -404,7 +521,7 @@ function sheetHtml(sh){const o=SER[sh];const hat=S.hat[sh]&&(S.hat[sh]==='ort'||
     const name=p==='ta'&&o.taCalc?'TA <small>Na₂CO₃ + bikarbonat + NaOH’tan hesap</small>':esc(P.n);
     h+=`<button class="prow" data-key="${esc(key)}" aria-expanded="${S.open===key}"><span class="n">${name}${pill}<small>${fmtT(a[0])}${sp?' · hedef '+sp.t:''}</small></span><span class="v"><b>${fmtN(a[1],P.d)}</b><u>${P.u}</u><span class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'ilk ölçüm':(dl>0?'▲ ':dl<0?'▼ ':'= ')+fmtN(Math.abs(dl),P.d)}</span></span>${spark(rec)}</button>`;
     if(S.open===key){const rg=S.range[key]!=null?S.range[key]:7;
-      h+=`<div class="detail"><div class="seg" role="group" aria-label="Zaman aralığı">${RANGES.map(([n,d])=>`<button data-key="${esc(key)}" data-rng="${d}" aria-pressed="${rg===d}">${n}</button>`).join('')}</div>${chart(sh,p,hat,rg)}`;
+      h+=`<div class="detail"><div class="seg" role="group" aria-label="Zaman aralığı">${RANGES.map(([n,d])=>`<button data-key="${esc(key)}" data-rng="${d}" aria-pressed="${rg===d}">${n}</button>`).join('')}</div><div class="cwrap" role="button" tabindex="0" aria-label="Grafiği büyüt" data-big="${esc(key)}" data-hh="${hat}" data-r="${rg}">${chart(sh,p,hat,rg)}</div><p class="hint">Büyütmek için grafiğe dokunun.</p>`;
       const lastRow=o.rows[o.t.filter(t=>o.rows[t][p]).pop()][p];
       if(o.hats.length>1)h+=`<div class="hatv">${o.hats.filter(x=>lastRow[x]!=null).map(x=>`<div><small><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${hatColor(x)};margin-right:4px"></i>${hatName(x)}</small><b>${fmtN(lastRow[x],P.d)}</b></div>`).join('')}</div>`;
       if(hat==='ort'&&o.hats.length>1)h+='<p class="note">Kalın çizgi hat ortalaması.</p>';
@@ -455,9 +572,11 @@ function dashHtml(){const all=Object.keys(SER);const noCfg=!(S.cfg.sekmeler||[])
   h+='</section>';
   let keys=[];(S.cfg.pano||[]).forEach(e=>{if(!e||!e.p)return;const sh=sheetsFor(e.sayfa,e.p)[0];if(sh&&!keys.some(k=>k[0]===sh&&k[1]===e.p))keys.push([sh,e.p]);});
   if(!keys.length)all.sort().forEach(sh=>SER[sh].params.slice(0,2).forEach(p=>keys.length<8&&keys.push([sh,p])));
-  h+='<section class="sheet"><div class="sh-h"><h2>Önemli grafikler</h2><span class="fr">son 7 gün · hat ortalaması</span></div><div class="dgrid">';
+  const GR=S.cfg.grafikler||[];
+  h+=`<section class="sheet"><div class="sh-h"><h2>Grafiklerim</h2><button class="addbtn" id="gNew">+ Grafik oluştur</button></div>`+(GR.length?'<div class="dgrid">'+GR.map((g,i)=>customCard(g,i)).join('')+'</div>':'<p class="note">Farklı sayfalardan parametreleri aynı grafikte görmek için grafik oluşturun; örneğin üç sayfanın tuzunu birlikte.</p>')+'</section>';
+  h+='<section class="sheet"><div class="sh-h"><h2>Önemli grafikler</h2><span class="fr">son 7 gün · büyütmek için dokunun</span></div><div class="dgrid">';
   keys.forEach(([sh,p])=>{const P=PARAMS[p];const {l,pr}=lastTwo(sh,p);if(!l)return;const dl=pr?l[1]-pr[1]:null;const sp=spec(sh,p);
-    h+=`<button class="dcard" data-go="${sectionOf(sh)}" data-p="${esc(sh+'|'+p)}"><span class="dh"><span><b>${esc(sh)}</b> ${p==='ta'&&SER[sh].taCalc?'TA (hesap)':esc(P.n)}</span><span class="dv"><b>${fmtN(l[1],P.d)}</b> ${P.u} <i class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'':(dl>0?'▲':dl<0?'▼':'=')+fmtN(Math.abs(dl),P.d)}</i></span></span>${chart(sh,p,'ort',7)}${sp?`<span class="note">hedef ${sp.t}</span>`:''}</button>`;});
+    h+=`<button class="dcard" data-bd="${esc(sh+'|'+p)}"><span class="dh"><span><b>${esc(sh)}</b> ${p==='ta'&&SER[sh].taCalc?'TA (hesap)':esc(P.n)}</span><span class="dv"><b>${fmtN(l[1],P.d)}</b> ${P.u} <i class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'':(dl>0?'▲':dl<0?'▼':'=')+fmtN(Math.abs(dl),P.d)}</i></span></span>${chart(sh,p,'ort',7)}${sp?`<span class="note">hedef ${sp.t}</span>`:''}</button>`;});
   return h+'</div></section>';}
 
 function goTo(sec,key){if(!sec)return;const sx=sections();const i=sx.findIndex(s=>s.k===S.tab),j=sx.findIndex(s=>s.k===sec);S.open=key||null;if(key)S.hat[key.split('|')[0]]='ort';
@@ -482,6 +601,7 @@ function normCfg(c){const o=Object.assign(JSON.parse(JSON.stringify(DEFCFG)),c&&
   o.spek=(Array.isArray(o.spek)?o.spek:[]).filter(x=>x&&PARAMS[x.p]).map(x=>({sayfa:wordsTxt(x.sayfa),p:x.p,min:num(x.min),max:num(x.max)}));
   o.pano=(Array.isArray(o.pano)?o.pano:[]).filter(x=>x&&PARAMS[x.p]).map(x=>({sayfa:wordsTxt(x.sayfa),p:x.p}));
   o.kurallar=Array.isArray(o.kurallar)?o.kurallar.filter(r=>r&&(r.tip==='yon'||r.tip==='patern')):[];
+  o.grafikler=(Array.isArray(o.grafikler)?o.grafikler:[]).slice(0,12).map(g=>({ad:String((g&&g.ad)||'').slice(0,40),items:(Array.isArray(g&&g.items)?g.items:[]).filter(x=>x&&x.sayfa&&PARAMS[x.p]).slice(0,6).map(x=>({sayfa:String(x.sayfa),p:x.p}))})).filter(g=>g.items.length);
   o.ad=String(o.ad||DEFCFG.ad).slice(0,30);o.eskiSaat=num(o.eskiSaat)||12;return o;}
 function openSet(){S.draft=JSON.parse(JSON.stringify(S.cfg));while(S.draft.sekmeler.length<NTAB)S.draft.sekmeler.push({n:'',sub:'',kel:''});
   $('setPanel').hidden=false;$('upPanel').hidden=true;$('upBtn').textContent='Excel yükle';$('upBtn').setAttribute('aria-expanded','false');$('setBtn').setAttribute('aria-expanded','true');renderSet();window.scrollTo({top:0,behavior:'smooth'});}
