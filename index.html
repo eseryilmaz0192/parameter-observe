@@ -231,7 +231,7 @@ const PARAMS={
   dens:{n:'Yoğunluk',u:'g/cm³',d:4},
   ta:{n:'TA',u:'%',d:2},
   nacl_gl:{n:'Tuz (NaCl)',u:'g/l',d:1},
-  nacl_p:{n:'NaCl',u:'%',d:2},
+  nacl_p:{n:'Tuz (NaCl)',u:'%',d:2},
   naoh:{n:'NaOH',u:'%',d:2},
   na2co3:{n:'Na₂CO₃',u:'%',d:2},
   nahco3:{n:'NaHCO₃',u:'%',d:2},
@@ -273,11 +273,11 @@ function sectionOf(sh){const sec=sections();if(S.map[sh]&&sec.some(s=>s.k===S.ma
 function normParam(h){
   const s=trLow(h);if(!s)return null;
   if(/tarih|saat|date|time|numune|açıklama|aciklama|not\b/.test(s))return null;
+  if(/nacl|tuz/.test(s)){if(/g\s*\/\s*cm|g\/cc|g\s*\/\s*ml/.test(s))return 'nacl_gcm';if(/g\s*\/\s*l|gr\s*\/\s*l|g\/lt/.test(s))return 'nacl_gl';if(/%/.test(s))return 'nacl_p';return 'nacl_gl';}
   if(/yo[ğg]unluk|dens|g\/cm/.test(s))return 'dens';
   if(/bikarbonat|nahco/.test(s))return 'nahco3';
   if(/karbonat|na2co|na₂co/.test(s))return 'na2co3';
   if(/naoh|kostik/.test(s))return 'naoh';
-  if(/nacl|tuz/.test(s)){if(/g\s*\/\s*l|gr\s*\/\s*l|g\/lt/.test(s))return 'nacl_gl';if(/%/.test(s))return 'nacl_p';return 'nacl_gl';}
   if(/(^|[^a-zçğıöşü])t\.?\s?a\.?($|[^a-zçğıöşü])|toplam alkal/.test(s))return 'ta';
   if(/debi|m3\/h|m³\/h|akış|akis/.test(s))return 'debi';
   if(/s[ıi]cakl[ıi]k|°c|sıc\./.test(s))return 'sic';
@@ -308,7 +308,7 @@ function parseSheet(ws){
   const out=[];let last=null;
   rows.slice(hi+1).forEach(r=>{if(!r)return;let d=dayMs(r[dc]);if(d==null){if(tc>=0&&last!=null&&r[tc]!=null)d=last;else return;}last=d;
     const mn=tc>=0?timeMin(r[tc],r[dc]):timeMin(null,r[dc]);const t=d+mn*60000;const v={};let any=false;
-    cols.forEach(([i,p,h])=>{const x=cellNum(r[i]);if(x!=null){(v[p]=v[p]||{})[h]=Math.round(x*1e4)/1e4;any=true;}});
+    cols.forEach(([i,p,h])=>{let x=cellNum(r[i]);if(x==null)return;if(p==='nacl_gcm'){p='nacl_gl';if(x<1)x*=1000;}(v[p]=v[p]||{})[h]=Math.round(x*1e4)/1e4;any=true;});
     if(any)out.push({t,v});});
   if(!out.length)return {err:'veri satırı yok'};
   return {rows:out};}
@@ -351,7 +351,13 @@ function build(){SER={};Object.values(S.docs).forEach(d=>{if(!d||!d.sh||!d.rows)
   Object.entries(SER).forEach(([sh,o])=>{o.t=Object.keys(o.rows).map(Number).sort((a,b)=>a-b);
     const ps=new Set(),hs=new Set();o.t.forEach(t=>Object.entries(o.rows[t]).forEach(([p,h])=>{ps.add(p);Object.keys(h).forEach(x=>hs.add(x));}));
     o.taCalc=!ps.has('ta')&&ps.has('na2co3');if(o.taCalc){ps.add('ta');o.t.forEach(t=>{const r=o.rows[t];if(!r.na2co3)return;r.ta={};Object.keys(r.na2co3).forEach(h=>{const c=r.na2co3[h],b=(r.nahco3||{})[h],n=(r.naoh||{})[h];r.ta[h]=Math.round((c+(b||0)*0.6310+(n||0)*1.3250)*1e4)/1e4;});});}
+    o.calc={ta:o.taCalc};
+    if(ps.has('dens')){const conv=(from,to,f)=>{if(!ps.has(from)||ps.has(to))return;let n=0;o.t.forEach(t=>{const r=o.rows[t];if(!r[from]||!r.dens)return;
+        Object.keys(r[from]).forEach(h=>{let d=r.dens[h];if(d==null){const ds=Object.values(r.dens);if(ds.length)d=ds.reduce((a,b)=>a+b,0)/ds.length;}if(d==null||!isFinite(d))return;if(d>100)d/=1000;
+          (r[to]=r[to]||{})[h]=Math.round(f(r[from][h],d)*1e4)/1e4;n++;});});if(n){ps.add(to);o.calc[to]=true;}};
+      conv('nacl_p','nacl_gl',(x,d)=>x*d*10);conv('nacl_gl','nacl_p',(x,d)=>x/(d*10));}
     o.params=PORDER.filter(p=>ps.has(p));o.hats=[...hs].sort();o.last=o.t[o.t.length-1];});}
+const CALCNOTE={ta:'Na₂CO₃ + bikarbonat + NaOH’tan hesap',nacl_gl:'% × yoğunluk × 10 ile hesap',nacl_p:'g/l ÷ (yoğunluk × 10) ile hesap'};
 
 function series(sh,p,hat){const o=SER[sh];const out={};const hats=hat==='ort'?o.hats:[hat];
   hats.forEach(h=>out[h]=[]);const avg=[];
@@ -456,9 +462,9 @@ function renderBuilder(){const ov=$('ov');const g=BD.g;const sheets=Object.keys(
   <div class="grp"><h3>Seriler</h3><div class="rowg pano head"><span>Sayfa</span><span>Parametre</span><span></span></div>`;
   g.items.forEach((x,i)=>{const ps=x.sayfa&&SER[x.sayfa]?SER[x.sayfa].params:[];
     h+=`<div class="rowg pano bd-row"><select id="bd${i}s" data-f="sh" aria-label="Seri ${i+1} sayfa"><option value="">Sayfa</option>${sheets.map(s=>`<option value="${esc(s)}"${s===x.sayfa?' selected':''}>${esc(s)}</option>`).join('')}</select>
-    <select id="bd${i}p" data-f="p" aria-label="Seri ${i+1} parametre"><option value="">Parametre</option>${ps.map(p=>`<option value="${p}"${p===x.p?' selected':''}>${PARAMS[p].n} (${PARAMS[p].u})</option>`).join('')}</select>
+    <select id="bd${i}p" data-f="p" aria-label="Seri ${i+1} parametre"><option value="">Parametre</option>${ps.map(p=>`<option value="${p}"${p===x.p?' selected':''}>${PARAMS[p].n} (${PARAMS[p].u})${SER[x.sayfa].calc[p]?' · hesap':''}</option>`).join('')}</select>
     <button class="xbtn" data-bdel="${i}" aria-label="Seriyi sil">×</button></div>`;});
-  h+=`${g.items.length<6?'<button class="addbtn" id="bdAdd">+ Seri ekle</button>':''}<p class="help">Aynı birimdeki seriler ortak eksende, farklı birimdekiler kendi ölçeğinde çizilir.</p></div>
+  h+=`${g.items.length<6?'<button class="addbtn" id="bdAdd">+ Seri ekle</button>':''}<p class="help">Aynı birimdeki seriler ortak eksende, farklı birimdekiler kendi ölçeğinde çizilir. Tuzu % olan sayfalarda yoğunluk da varsa g/l karşılığı hesaplanır (ve tersi); tüm serilerde aynı birimi seçerseniz tek eksende karşılaştırırsınız.</p></div>
   <div class="tools"><button class="btn" id="bdSave">Kaydet</button>${BD.idx!=null?`<button class="btn danger" id="bdDel">${BD.del?'Emin misiniz? Tekrar basın':'Grafiği sil'}</button>`:''}<button class="btn ghost" id="bdCancel">Vazgeç</button></div><div class="msg" id="bdMsg"></div></div>`;
   ov.innerHTML=h;
   $('ovX').onclick=closeBig;$('bdCancel').onclick=closeBig;
@@ -518,7 +524,7 @@ function sheetHtml(sh){const o=SER[sh];const hat=S.hat[sh]&&(S.hat[sh]==='ort'||
     const a=pts[pts.length-1],b=pts.length>1?pts[pts.length-2]:null;const P=PARAMS[p];const dl=b?a[1]-b[1]:null;
     const sp=spec(sh,p);let pill='';if(sp){const ok=inSpec(sp,a[1]);pill=`<span class="pill ${ok?'ok':'bad'}">${ok?'spekte':'spek dışı'}</span>`;}
     const rec=pts.filter(x=>x[0]>=a[0]-7*864e5);
-    const name=p==='ta'&&o.taCalc?'TA <small>Na₂CO₃ + bikarbonat + NaOH’tan hesap</small>':esc(P.n);
+    const name=o.calc[p]?esc(P.n)+' <small>'+CALCNOTE[p]+'</small>':esc(P.n);
     h+=`<button class="prow" data-key="${esc(key)}" aria-expanded="${S.open===key}"><span class="n">${name}${pill}<small>${fmtT(a[0])}${sp?' · hedef '+sp.t:''}</small></span><span class="v"><b>${fmtN(a[1],P.d)}</b><u>${P.u}</u><span class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'ilk ölçüm':(dl>0?'▲ ':dl<0?'▼ ':'= ')+fmtN(Math.abs(dl),P.d)}</span></span>${spark(rec)}</button>`;
     if(S.open===key){const rg=S.range[key]!=null?S.range[key]:7;
       h+=`<div class="detail"><div class="seg" role="group" aria-label="Zaman aralığı">${RANGES.map(([n,d])=>`<button data-key="${esc(key)}" data-rng="${d}" aria-pressed="${rg===d}">${n}</button>`).join('')}</div><div class="cwrap" role="button" tabindex="0" aria-label="Grafiği büyüt" data-big="${esc(key)}" data-hh="${hat}" data-r="${rg}">${chart(sh,p,hat,rg)}</div><p class="hint">Büyütmek için grafiğe dokunun.</p>`;
@@ -576,7 +582,7 @@ function dashHtml(){const all=Object.keys(SER);const noCfg=!(S.cfg.sekmeler||[])
   h+=`<section class="sheet"><div class="sh-h"><h2>Grafiklerim</h2><button class="addbtn" id="gNew">+ Grafik oluştur</button></div>`+(GR.length?'<div class="dgrid">'+GR.map((g,i)=>customCard(g,i)).join('')+'</div>':'<p class="note">Farklı sayfalardan parametreleri aynı grafikte görmek için grafik oluşturun; örneğin üç sayfanın tuzunu birlikte.</p>')+'</section>';
   h+='<section class="sheet"><div class="sh-h"><h2>Önemli grafikler</h2><span class="fr">son 7 gün · büyütmek için dokunun</span></div><div class="dgrid">';
   keys.forEach(([sh,p])=>{const P=PARAMS[p];const {l,pr}=lastTwo(sh,p);if(!l)return;const dl=pr?l[1]-pr[1]:null;const sp=spec(sh,p);
-    h+=`<button class="dcard" data-bd="${esc(sh+'|'+p)}"><span class="dh"><span><b>${esc(sh)}</b> ${p==='ta'&&SER[sh].taCalc?'TA (hesap)':esc(P.n)}</span><span class="dv"><b>${fmtN(l[1],P.d)}</b> ${P.u} <i class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'':(dl>0?'▲':dl<0?'▼':'=')+fmtN(Math.abs(dl),P.d)}</i></span></span>${chart(sh,p,'ort',7)}${sp?`<span class="note">hedef ${sp.t}</span>`:''}</button>`;});
+    h+=`<button class="dcard" data-bd="${esc(sh+'|'+p)}"><span class="dh"><span><b>${esc(sh)}</b> ${esc(P.n)}${SER[sh].calc[p]?' (hesap)':''}}</span><span class="dv"><b>${fmtN(l[1],P.d)}</b> ${P.u} <i class="${dl>0?'up':dl<0?'dn':''}">${dl==null?'':(dl>0?'▲':dl<0?'▼':'=')+fmtN(Math.abs(dl),P.d)}</i></span></span>${chart(sh,p,'ort',7)}${sp?`<span class="note">hedef ${sp.t}</span>`:''}</button>`;});
   return h+'</div></section>';}
 
 function goTo(sec,key){if(!sec)return;const sx=sections();const i=sx.findIndex(s=>s.k===S.tab),j=sx.findIndex(s=>s.k===sec);S.open=key||null;if(key)S.hat[key.split('|')[0]]='ort';
